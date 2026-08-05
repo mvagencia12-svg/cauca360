@@ -27,7 +27,7 @@ textarea:focus{border-color:#3b82f6}
 textarea::placeholder{color:#475569}
 
 /* RADIO CARDS */
-.radio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.radio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
 .radio-card{position:relative}
 .radio-card input{display:none}
 .radio-card .inner{cursor:pointer;padding:.625rem .5rem;background:#1e293b;border:1.5px solid #334155;border-radius:10px;text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%}
@@ -88,6 +88,12 @@ select{width:100%;padding:.625rem .75rem;background:#1e293b;border:1px solid #33
 .net-tt{color:#e2e8f0;background:rgba(100,116,139,.2)}
 .net-x{color:#cbd5e1;background:rgba(100,116,139,.2)}
 
+.arte-box{margin:0 1.25rem 1rem;background:linear-gradient(135deg,#1e3a6e,#1e293b);border:1px solid #3b82f6;border-radius:12px;padding:.875rem 1rem;position:relative}
+.arte-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#60a5fa;margin-bottom:.375rem}
+.arte-text{color:#fff;font-weight:800;font-size:17px;line-height:1.25;letter-spacing:-.01em}
+.arte-copy{position:absolute;top:.75rem;right:.75rem;background:rgba(15,23,42,.6);border:none;color:#93c5fd;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s}
+.arte-copy:hover{background:#0f172a;color:#fff}
+.arte-copy.copied{background:#166534;color:#bbf7d0}
 .result-body{padding:1rem 1.25rem .75rem}
 .result-title{color:#fff;font-weight:700;font-size:15px;line-height:1.4;margin-bottom:.75rem}
 .result-dev{color:#cbd5e1;font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:.75rem}
@@ -98,6 +104,10 @@ select{width:100%;padding:.625rem .75rem;background:#1e293b;border:1px solid #33
 .alt-list{background:#1e293b;border-radius:10px;padding:.25rem 1rem;list-style:none}
 .alt-list li{padding:.5rem 0;border-bottom:1px solid #334155;color:#cbd5e1;font-size:13px}
 .alt-list li:last-child{border-bottom:none}
+.alt-tag{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:4px;margin-right:.5rem;vertical-align:1px}
+.alt-tag-0{background:rgba(220,38,38,.18);color:#f87171}
+.alt-tag-1{background:rgba(168,85,247,.18);color:#c084fc}
+.alt-tag-2{background:rgba(100,116,139,.25);color:#94a3b8}
 .reel-box{background:#1e293b;border-radius:10px;padding:.875rem 1rem;font-size:13px;color:#cbd5e1;font-style:italic;border-left:3px solid #3b82f6}
 
 .result-copy{padding:.25rem 1.25rem 1rem}
@@ -129,7 +139,7 @@ select{width:100%;padding:.625rem .75rem;background:#1e293b;border:1px solid #33
     <!-- PASO 1 -->
     <div class="section">
       <div class="section-label"><span>01</span> ¿Qué está pasando?</div>
-      <textarea id="topicInput" rows="4" placeholder="Pega aquí la noticia, historia o tema principal..."></textarea>
+      <textarea id="topicInput" rows="4" placeholder="Pega aquí la noticia completa. Puede venir de otro medio, ser corta o larga, con emojis o formato raro. Se reconstruye desde cero."></textarea>
     </div>
 
     <!-- PASO 2 -->
@@ -137,16 +147,12 @@ select{width:100%;padding:.625rem .75rem;background:#1e293b;border:1px solid #33
       <div class="section-label"><span>02</span> Elige la voz</div>
       <div class="radio-grid">
         <label class="radio-card">
-          <input type="radio" name="styleOption" value="cauca" checked>
-          <div class="inner"><span class="rlabel">Cauca</span><span class="rdesc">Cercana y caucana</span></div>
+          <input type="radio" name="styleOption" value="estilo360" checked>
+          <div class="inner"><span class="rlabel">Estilo 360</span><span class="rdesc">Gancho fuerte, cronista, marca propia</span></div>
         </label>
         <label class="radio-card">
-          <input type="radio" name="styleOption" value="vice">
-          <div class="inner"><span class="rlabel">Vice</span><span class="rdesc">Cruda y directa</span></div>
-        </label>
-        <label class="radio-card">
-          <input type="radio" name="styleOption" value="sports_critic">
-          <div class="inner"><span class="rlabel">Deportes</span><span class="rdesc">Pasión y debate</span></div>
+          <input type="radio" name="styleOption" value="normal">
+          <div class="inner"><span class="rlabel">Normal</span><span class="rdesc">Informativo claro y sobrio</span></div>
         </label>
       </div>
     </div>
@@ -182,10 +188,13 @@ select{width:100%;padding:.625rem .75rem;background:#1e293b;border:1px solid #33
     <div class="section">
       <div class="section-label"><span>04</span> Estrategia</div>
       <select id="select-cta">
+        
+        
+        
+        <option value="none">📰 Solo Informar</option>
         <option value="comment">💬 Generar Debate</option>
         <option value="share">🚀 Viralidad</option>
         <option value="tag">📢 Alcance</option>
-        <option value="none">📰 Solo Informar</option>
       </select>
       <label class="checkbox-row" style="margin-bottom:.5rem">
         <input type="checkbox" id="check-alternatives">
@@ -251,32 +260,240 @@ const els = {
 let lastParams = null;
 
 function buildSystemPrompt(style, cta, video, altTitles) {
-  const personas = {
-    cauca: 'Eres un estratega digital experto en comunicación regional para el departamento del Cauca, Colombia. Tu voz es: orgullosamente caucana, humana, cercana a la comunidad, sin tecnicismos.',
-    vice: 'Eres un redactor de estilo VICE Magazine. Tu voz es: cruda, directa, sin filtros, inmersiva. Tratas al lector como adulto inteligente.',
-    sports_critic: 'Eres un analista deportivo polémico y apasionado. Tu voz genera debate, usa metáforas futboleras, es crítica pero fundamentada.'
-  };
-  let inst = `${personas[style]}\n\nREGLAS ESTRICTAS:\n1. NUNCA uses emojis.\n2. Reescribe con tu voz y estilo.\n3. Incluye hashtags relevantes más #Cauca si aplica.\n4. Responde ÚNICAMENTE con JSON válido, sin markdown ni explicaciones.`;
-  if (altTitles) inst += '\n5. Incluye "titulares_alternativos" con array de 3 títulos por red.';
-  if (video) inst += '\n6. Incluye "caption_video" optimizado para Reels (primeros 3 segundos, formato vertical).';
+
+  const identidad = `
+ERES EL REDACTOR DIGITAL DE CAUCA 360 INFORMATIVO.
+
+IDENTIDAD DEL MEDIO:
+- Medio local del Cauca, Colombia. Base principal: Santander de Quilichao.
+- También cubre otros municipios del Cauca, noticias nacionales y mundiales.
+- Tono: cercano, humano, directo. NUNCA institucional.
+- La gente nos lee como si un vecino bien informado les contara lo que pasó.
+
+ESTILOS DE ESCRITURA (combínalos según el tipo de noticia):
+1. EL CRONISTA: Narra como película. Presente, cinematográfico, corto.
+   Ejemplo: "Llegaron a las 8 de la mañana. Uniforme, maquinaria y papeles. Para cuando el sol pegó duro, las familias ya estaban afuera."
+2. EL DATO DIRECTO: Solo hechos en frases cortas. Como telegrama moderno.
+   Ejemplo: "Desalojo hoy en Santander de Quilichao. 12 familias afectadas. ICBF presente. Cauca 360 estuvo ahí."
+3. LA VOZ DEL BARRIO: Como te lo cuenta un vecino desde la ventana.
+   Ejemplo: "En el barrio dicen que nadie sabía que venían hoy. Las familias alcanzaron a sacar lo que pudieron."
+
+USA SEGÚN EL TIPO DE NOTICIA:
+- Orden público, desalojos, conflicto → El Cronista
+- Política, cifras, decisiones → El Dato Directo  
+- Comunidad, cultura, cotidiano → La Voz del Barrio
+- Deportes → apasionado, con metáforas futboleras, genera debate
+- Nacional/Mundial → conecta con el impacto local en el Cauca
+
+EXPRESIONES MARCA (úsalas cuando sea natural y pertinente, no en todas):
+- "Y el Cauca no se calla" → cierres de noticias de denuncia
+- "Atención, Cauca" → noticias urgentes o de alto impacto
+- "Así pasó" → hechos concretos que necesitan ser contados
+- "Cauca 360 estuvo ahí" → cuando el medio tuvo presencia en el lugar
+
+MÉTODO DE TRABAJO (obligatorio, en este orden):
+
+PASO 1 — EXTRAE LOS HECHOS
+Lee el texto de entrada y extrae ÚNICAMENTE los datos verificables:
+qué pasó, quién, dónde, cuándo, cifras, actores involucrados, declaraciones textuales relevantes.
+Nada más. Los hechos son lo único que se conserva de la fuente.
+
+PASO 2 — DESCARTA LA REDACCIÓN ORIGINAL
+Una vez extraídos los hechos, OLVIDA cómo estaba escrito el original.
+- NO parafrasees frase por frase.
+- NO conserves el orden de los párrafos.
+- NO mantengas la estructura narrativa de la fuente.
+- DESCARTA todo el formato ajeno: emojis, caritas, viñetas con símbolos, MAYÚSCULA SOSTENIDA, signos de exclamación múltiples, etiquetas tipo "ULTIMA HORA", "URGENTE", "ATENCIÓN".
+- Los emojis del texto de entrada se ignoran por completo. NO son un dato de la noticia ni una pista de tono. Son estilo de otro medio y se descartan.
+
+PASO 3 — RECONSTRUYE DESDE CERO
+Escribe una nota nueva partiendo solo de los hechos, con el orden que decide Cauca 360 y en la voz de Cauca 360.
+El resultado NO debe parecerse al original ni en estructura ni en fraseo. Solo deben coincidir los hechos.
+Parafrasear es cambiar palabras manteniendo el esqueleto: eso se nota y está prohibido.
+Reconstruir es partir de los datos y volver a escribir: eso es lo que debes hacer.
+
+NORMALIZACIÓN DE EXTENSIÓN (la entrada varía, la salida no):
+- Si el texto de entrada es CORTO: trabaja con lo que hay. PROHIBIDO inventar, rellenar o agregar contexto que no estaba en la fuente. Si faltan datos, escribe más apretado.
+- Si el texto de entrada es LARGO: tu trabajo es jerarquizar. Identifica lo esencial y descarta el relleno institucional, las citas protocolarias y los párrafos de contexto genérico.
+- SALIDA EN AMBOS CASOS: título + UN párrafo. Dos párrafos SOLO si la noticia tiene dos hechos igual de importantes que no se pueden fusionar sin perder claridad. Por defecto: un párrafo.
+
+SI UN DATO ES EXCLUSIVO DE UNA FUENTE:
+Si detectas una declaración o cifra que claramente proviene de un solo medio, puedes sugerir atribuirla ("según X"). Citar respalda, no resta.
+
+REGLAS ABSOLUTAS:
+1. CERO EMOJIS. En ningún campo: ni título del arte, ni titular, ni cuerpo, ni hashtags, ni titulares alternativos. Sin excepción.
+2. NUNCA hagas preguntas retóricas — ni te las respondas.
+3. NUNCA uses frases de IA como: "El debate está abierto", "La comunidad dividida", "Sin precedentes", "En el marco de", "Cabe destacar", "Cabe resaltar", "Es importante señalar".
+4. NUNCA uses lenguaje institucional o jurídico ("presuntamente", "actuación administrativa", "debido proceso", "en el marco de la normatividad vigente").
+5. El texto debe sonar 100% humano. Si suena a IA, está mal.
+6. Los titulares máximo 10 palabras. Cortos, fuertes, que generen emoción inmediata.
+7. El cuerpo: un párrafo. Concreto. La gente no lee más.
+8. Responde ÚNICAMENTE con JSON válido, sin markdown ni explicaciones.
+
+UBICACIÓN EXPLÍCITA:
+La ubicación debe quedar clara desde la primera línea, integrada en la redacción (no como etiqueta suelta).
+- Si es de Santander de Quilichao: nómbralo directo.
+- Si es de otro municipio del Cauca: nómbralo.
+- Si es NACIONAL o MUNDIAL: cuenta el hecho y conecta con el impacto concreto en el Cauca o en Quilichao. Ese puente es lo que diferencia a Cauca 360 de cualquier medio que replica la misma noticia nacional.
+
+TEXTO PARA EL ARTE ("texto_arte"):
+Título corto y contundente que va SOBRE la imagen de la pieza gráfica.
+- MÁXIMO 8 PALABRAS. Debe leerse de un vistazo en el feed.
+- Es distinto del titular del caption: el del arte detiene el scroll, el del caption desarrolla.
+- Sin punto final. Sin emojis. Sin comillas.
+- Debe funcionar solo, sin contexto.
+
+TIPOS DE TITULAR SEGÚN EMOCIÓN (elige el más poderoso para cada noticia):
+- Indignación: "Los sacaron a la calle. Y nadie avisó."
+- Sorpresa: "Había niños adentro cuando llegaron."
+- Curiosidad: "Lo que pasó, Santander de Quilichao no lo va a olvidar."
+- Dato duro: "12 familias. Una mañana. Un operativo que divide al Cauca."
+- Cinematográfico: "Llegaron al amanecer. Se fueron con todo."
+
+HASHTAGS — CRITERIO 2026 (los algoritmos ya leen el texto, no las etiquetas):
+El hashtag hoy sirve para CONTEXTO y FIRMA DE MARCA, no para forzar alcance. Menos es más.
+CANTIDAD EXACTA POR RED (no la excedas):
+- FACEBOOK: 1 o 2 máximo. Solo #Cauca360 + el geográfico. Aquí el hashtag es firma, no alcance.
+- INSTAGRAM: 3 a 5. #Cauca360 + geográfico + tema. Aquí sí aportan descubrimiento.
+- TIKTOK: 3 a 4. Incluye uno de tendencia del tema si aplica. Es donde más peso conservan.
+- X (TWITTER): 1 máximo, y solo si el tema está en tendencia. Más de uno se lee como spam.
+
+FIRMA FIJA: #Cauca360 va siempre, en todas las redes.
+GEOGRÁFICO segun la zona: #SQuilichao (Santander de Quilichao), #Cauca (departamento/otros municipios), #Popayán, #NorteDelCauca.
+DE MARCA (usa como máximo uno, y solo cuando encaje): #ElCaucaHabla (noticias de impacto o denuncia), #AquíEnElCauca (cotidiano/comunidad).
+PROHIBIDO: rellenar con hashtags genéricos (#noticias #colombia #viral). Si no aporta contexto real, no va.
+`;
+
+  const modoEstilo360 = `
+MODO ACTIVO: ESTILO 360 (el sello de la casa)
+Este es el modo insignia de Cauca 360. Aquí escribes con toda la personalidad del medio.
+- Titular con máximo impacto emocional. Corto, seco, que pare el scroll.
+- Usa los 3 estilos narrativos (Cronista / Dato Directo / Voz del Barrio) según el tipo de noticia.
+- Usa las expresiones marca cuando encajen naturalmente.
+- Frases cortas. Ritmo. Nada sobra.
+- El texto debe sonar a que lo escribió una persona del Cauca que estuvo ahí.
+- Arriesga en el gancho. Prefiere ser memorable antes que neutral.
+`;
+
+  const modoNormal = `
+MODO ACTIVO: NORMAL (informativo sobrio)
+Aquí bajas la intensidad. Sigues siendo Cauca 360 pero en registro informativo.
+- Titular claro y directo. Informa lo esencial sin dramatismo.
+- Predomina el estilo Dato Directo. Hechos, cifras, ubicación, actores.
+- NO uses expresiones marca. NO uses recursos cinematográficos.
+- Mantén el lenguaje humano y sin tecnicismos, pero neutral en el tono.
+- Útil para: comunicados, información de servicio, temas delicados, cifras oficiales.
+- Sigue prohibido: emojis, preguntas retóricas, lenguaje institucional y frases de IA.
+`;
+
+  let inst = identidad;
+  if (style === 'estilo360') inst += modoEstilo360;
+  if (style === 'normal') inst += modoNormal;
+
+  if (altTitles) inst += `
+ADEMÁS: Para cada red incluye el campo "titulares_alternativos" con un array de EXACTAMENTE 3 titulares, en este orden y con estos enfoques distintos entre sí:
+
+[0] ENFOQUE IMPACTO (amarillista controlado)
+El titular que más detiene el scroll. Va directo a la emoción más fuerte de la noticia.
+- Usa el dato más crudo, la cifra más alta, la consecuencia más grave.
+- Lenguaje contundente. Frases secas. Puede empezar por el hecho más impactante.
+- LÍMITE INNEGOCIABLE: solo puede afirmar lo que la noticia realmente dice. Prohibido exagerar cifras, insinuar hechos no confirmados, dar por sentado lo que aún se investiga o presentar como certeza algo que es versión de una parte. Impacto sí, invento no.
+- Ejemplo: "12 familias en la calle. Sin aviso previo."
+
+[1] ENFOQUE CREATIVO
+El titular con recurso literario. El que se recuerda.
+- Usa imagen, contraste, metáfora, ironía o ritmo. Cinematográfico.
+- Insinúa en vez de explicar. Genera curiosidad sin revelar todo.
+- Debe seguir siendo comprensible al primer vistazo: creativo no es confuso.
+- Ejemplo: "Llegaron al amanecer. Se fueron con todo."
+
+[2] ENFOQUE NORMAL
+El titular informativo y sobrio. El más seguro.
+- Qué pasó, dónde y a quién. Sin adornos ni carga emocional.
+- Es el titular que usarías para un tema delicado, oficial o de servicio.
+- Ejemplo: "Operativo de desalojo deja 12 familias afectadas en Santander de Quilichao."
+
+Los 3 deben ser claramente distintos entre sí, no variaciones de la misma frase. Todos máximo 12 palabras.`;
+  if (video) inst += '\nADEMÁS: Para cada red incluye campo "caption_video" optimizado para Reels: gancho visual en los primeros 3 segundos, frases muy cortas, ritmo rápido, formato vertical.';
+
   const ctaMap = {
-    comment: 'Termina con una pregunta que genere debate.',
-    share: 'Incluye dato impactante que motive compartir.',
-    tag: 'Incluye llamada a etiquetar a alguien.',
-    none: 'Informa claro y objetivo, sin CTA.'
+    none: `OBJETIVO: INFORMAR.
+La meta es que la gente entienda qué pasó, dónde y a quién afecta.
+- Prioriza claridad sobre impacto. Los datos verificables van primero.
+- Sin llamados a la acción de ningún tipo.
+- El texto termina cuando la historia termina. No agregues cierre artificial.
+- Enfoque del copy: qué pasó, dónde, cuándo, a quién afecta.`,
+
+    comment: `OBJETIVO: GENERAR DEBATE.
+La meta es que la gente comente, no que solo lea.
+
+REGLA CENTRAL: la invitación al comentario debe NACER DEL CONTENIDO ESPECÍFICO de esta noticia.
+Nunca de una fórmula. Si el cierre que escribiste serviría igual para cualquier otra noticia, está mal y debes reescribirlo.
+
+PROHIBIDO ABSOLUTAMENTE (fórmulas genéricas):
+"¿Tú qué opinas?" / "Cuéntanos en los comentarios" / "Déjanos saber tu opinión" /
+"¿Estás de acuerdo?" / "El debate está abierto" / "¿Qué piensas de esto?" /
+cualquier variante que pida comentarios directamente.
+
+CÓMO HACERLO BIEN — elige el mecanismo que la noticia realmente permita:
+1. CONTRADICCIÓN: hay dos versiones que no pueden ser ciertas a la vez. Ponlas juntas.
+   Ejemplo: "En el barrio dicen que nadie avisó. La Alcaldía dice que sí avisaron. Alguien no está diciendo la verdad."
+2. VACÍO DE INFORMACIÓN: falta un dato clave que las autoridades no han explicado. Señálalo.
+   Ejemplo: "Nadie ha explicado quién autorizó el operativo un domingo."
+3. CONOCIMIENTO LOCAL: algo que solo la gente del lugar puede confirmar o desmentir.
+   Ejemplo: "Los que viven ahí saben hace cuánto está ese predio ocupado."
+4. DATO QUE OBLIGA A TOMAR POSTURA: una cifra o hecho concreto ante el cual nadie queda neutral.
+   Ejemplo: "Son 12 familias. Cuatro con menores de edad."
+
+El cierre NO pide comentarios: crea la condición para que aparezcan solos.
+Si la noticia no da material para ninguno de los 4 mecanismos, cierra informando y no fuerces el debate.`,
+
+    share: `OBJETIVO: VIRALIDAD.
+La meta es que la gente comparta para que otros se enteren.
+- Abre con el dato más sorprendente, inesperado o poco conocido de toda la noticia.
+- Prioriza lo que la gente NO sabía sobre lo que ya se dio por hecho.
+- El titular debe funcionar solo, aunque nadie lea el cuerpo.
+- Enfoque del copy: el detalle que hace decir "no puede ser".`,
+
+    tag: `OBJETIVO: ALCANCE.
+La meta es que la gente etiquete a alguien específico.
+- Identifica claramente a quién le sirve o le afecta esta información: un barrio, un gremio, un municipio, un grupo.
+- Cierra con una frase que haga evidente para quién es útil, sin pedir explícitamente que etiqueten.
+- Enfoque del copy: la utilidad concreta para un grupo identificable.`
   };
-  inst += `\n\nESTRATEGIA: ${ctaMap[cta]}`;
+  inst += `\n\nESTRATEGIA DE ENGAGEMENT: ${ctaMap[cta]}`;
   return inst;
 }
 
 function buildUserPrompt(topic, networks) {
   const fmt = {
-    facebook: 'Título + 3-4 párrafos + hashtags. Máx 1500 chars.',
-    instagram: 'Título gancho + 2-3 párrafos ágiles + hashtags. Máx 2200 chars.',
-    tiktok: 'Gancho primera línea + frases cortas + hashtags tendencia. Máx 500 chars.',
-    x: 'Título + texto conciso. MÁXIMO 280 chars total con hashtags.'
+    facebook: `FACEBOOK: texto_arte (máx 8 palabras) + titular (máx 10 palabras) + UN párrafo (máx 90 palabras) + 1 o 2 hashtags.`,
+    instagram: `INSTAGRAM: texto_arte (máx 8 palabras) + titular (máx 10 palabras) + UN párrafo ágil (máx 70 palabras) + 3 a 5 hashtags.`,
+    tiktok: `TIKTOK: texto_arte (máx 8 palabras) + titular con gancho oral, se va a leer en voz alta + 2 o 3 frases cortas (máx 50 palabras) + 3 a 4 hashtags.`,
+    x: `X/TWITTER: texto_arte (máx 8 palabras) + titular + máx 2 frases. TOTAL del post incluyendo hashtag: máx 280 caracteres. 1 hashtag máximo.`
   };
-  return `TEMA: ${topic}\nREDES: ${networks.join(', ')}\n\nFORMATO:\n${networks.map(n=>`- ${n.toUpperCase()}: ${fmt[n]}`).join('\n')}\n\nGenera JSON con todas las redes. Estructura por red: {titulo, desarrollo, hashtags[]}`;
+  const formatSelected = networks.map(n => fmt[n]).join('\n\n');
+  return `TEXTO DE ENTRADA (puede venir de otro medio, ser corto o largo, y traer emojis o formato ajeno que debes descartar):
+${topic}
+
+REDES A GENERAR: ${networks.join(', ')}
+
+INSTRUCCIONES POR RED:
+${formatSelected}
+
+RECUERDA EL MÉTODO: extrae los hechos, descarta la redacción original por completo, y reconstruye desde cero en voz de Cauca 360. No parafrasees. Ignora todos los emojis y el formato de la fuente.
+
+ESTRUCTURA JSON — una entrada por red:
+{
+  "red": {
+    "texto_arte": "Título corto para ir sobre la imagen, máx 8 palabras",
+    "titulo": "El titular del caption, máx 10 palabras",
+    "desarrollo": "Un párrafo. Dos solo si es estrictamente necesario.",
+    "hashtags": ["#Cauca360", "#SQuilichao"]
+  }
+}
+
+Genera el JSON completo con todas las redes solicitadas. Solo JSON, nada más.`;
 }
 
 async function callClaude(systemPrompt, userPrompt) {
@@ -285,7 +502,7 @@ async function callClaude(systemPrompt, userPrompt) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1000,
+      max_tokens: 4000,
       system: systemPrompt,
       messages: [{role: 'user', content: userPrompt}]
     })
@@ -317,7 +534,8 @@ function netIcon(net) {
 function copyToClipboard(btn, text) {
   navigator.clipboard.writeText(text).then(()=>{
     const orig = btn.innerHTML;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Copiado';
+    const esArte = btn.classList.contains('arte-copy');
+    btn.innerHTML = esArte ? 'Copiado' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Copiado';
     btn.classList.add('copied');
     setTimeout(()=>{ btn.innerHTML=orig; btn.classList.remove('copied'); }, 2000);
   });
@@ -337,7 +555,7 @@ function renderResults(data, hasAlt, hasVideo) {
     if (hasAlt && Array.isArray(item.titulares_alternativos)) {
       altsHtml = `<div class="result-extra">
         <div class="extra-label">Titulares alternativos</div>
-        <ul class="alt-list">${item.titulares_alternativos.map(t=>`<li>${t}</li>`).join('')}</ul>
+        <ul class="alt-list">${item.titulares_alternativos.map((t,i)=>`<li><span class="alt-tag alt-tag-${i}">${['Impacto','Creativo','Normal'][i]||''}</span>${t}</li>`).join('')}</ul>
       </div>`;
     }
     let videoHtml = '';
@@ -348,10 +566,18 @@ function renderResults(data, hasAlt, hasVideo) {
       </div>`;
     }
 
+    const arteHtml = item.texto_arte ? `
+      <div class="arte-box">
+        <button class="arte-copy" onclick="copyToClipboard(this, ${JSON.stringify(item.texto_arte)})">Copiar</button>
+        <div class="arte-label">Texto para el arte</div>
+        <div class="arte-text">${item.texto_arte}</div>
+      </div>` : '';
+
     card.innerHTML = `
       <div class="result-header">
         <span class="net-badge ${netClass(net)}">${netIcon(net)} ${net.charAt(0).toUpperCase()+net.slice(1)}</span>
       </div>
+      ${arteHtml}
       <div class="result-body">
         <div class="result-title">${item.titulo}</div>
         <div class="result-dev">${item.desarrollo}</div>
@@ -380,7 +606,7 @@ els.generateBtn.addEventListener('click', async () => {
   if (!topic) { els.topic.style.borderColor='#ef4444'; setTimeout(()=>els.topic.style.borderColor='',2000); return; }
   const networks = ['facebook','instagram','tiktok','x'].filter(n=>document.getElementById(`check-${n}`)?.checked);
   if (!networks.length) { alert('Selecciona al menos una red social.'); return; }
-  const style = document.querySelector('input[name="styleOption"]:checked')?.value||'cauca';
+  const style = document.querySelector('input[name="styleOption"]:checked')?.value||'estilo360';
   const params = { topic, networks, style, cta: els.cta.value, hasAlt: els.altCheck.checked, hasVideo: els.videoCheck.checked };
   lastParams = params;
 
