@@ -57,6 +57,7 @@ textarea::placeholder{color:#475569}
 .checkbox-row input:checked ~ .cb-box{background:#2563eb;border-color:#3b82f6}
 .checkbox-row input:checked ~ .cb-box svg{display:block}
 .cb-label{font-size:14px;color:#e2e8f0}
+.cb-note{display:block;font-size:10px;color:#64748b;margin-top:2px;line-height:1.3}
 
 /* SELECT */
 select{width:100%;padding:.75rem;background:#1e293b;border:1px solid #334155;border-radius:10px;color:#e2e8f0;font-size:16px;font-family:inherit;outline:none;cursor:pointer;margin-bottom:.75rem;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;background-size:16px}
@@ -80,6 +81,7 @@ select{width:100%;padding:.75rem;background:#1e293b;border:1px solid #334155;bor
 .spinner.show{display:inline-block}
 
 /* ERROR */
+.aviso-box{padding:.75rem 1rem;background:#1c1917;border:1px solid #57534e;border-left:3px solid #f59e0b;border-radius:10px;color:#d6d3d1;font-size:12px;margin-bottom:.25rem}
 .error-box{display:none;padding:1rem;background:#1c0a0a;border:1px solid #7f1d1d;border-radius:12px;color:#fca5a5;font-size:14px;text-align:center}
 .error-box.show{display:block}
 
@@ -162,8 +164,8 @@ select{width:100%;padding:.75rem;background:#1e293b;border:1px solid #334155;bor
           <div class="inner"><span class="rlabel">Estilo 360</span><span class="rdesc">Gancho fuerte, cronista, marca propia</span></div>
         </label>
         <label class="radio-card">
-          <input type="radio" name="styleOption" value="normal">
-          <div class="inner"><span class="rlabel">Normal</span><span class="rdesc">Informativo claro y sobrio</span></div>
+          <input type="radio" name="styleOption" value="sinfiltro">
+          <div class="inner"><span class="rlabel">Sin Filtro</span><span class="rdesc">Crudo, confrontativo, irreverente</span></div>
         </label>
       </div>
     </div>
@@ -199,23 +201,25 @@ select{width:100%;padding:.75rem;background:#1e293b;border:1px solid #334155;bor
     <div class="section">
       <div class="section-label"><span>04</span> Estrategia</div>
       <select id="select-cta">
-        
-        
-        
-        <option value="none">📰 Solo Informar</option>
-        <option value="comment">💬 Generar Debate</option>
-        <option value="share">🚀 Viralidad</option>
-        <option value="tag">📢 Alcance</option>
+        <option value="share">Viralidad</option>
+        <option value="comment">Generar Debate</option>
+        <option value="tag">Alcance</option>
+        <option value="none">Solo Informar</option>
       </select>
       <label class="checkbox-row" style="margin-bottom:.5rem">
         <input type="checkbox" id="check-alternatives">
         <div class="cb-box"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M4.5 12.75l6 6 9-13.5"/></svg></div>
         <span class="cb-label">Generar 3 titulares alternativos</span>
       </label>
-      <label class="checkbox-row">
+      <label class="checkbox-row" style="margin-bottom:.5rem">
         <input type="checkbox" id="check-video">
         <div class="cb-box"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M4.5 12.75l6 6 9-13.5"/></svg></div>
         <span class="cb-label">Optimizar para Reels</span>
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" id="check-context">
+        <div class="cb-box"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M4.5 12.75l6 6 9-13.5"/></svg></div>
+        <span class="cb-label">Complementar con dato local<span class="cb-note">Busca en la web. Más lento y más costoso.</span></span>
       </label>
     </div>
   </div>
@@ -267,10 +271,11 @@ const els = {
   cta: document.getElementById('select-cta'),
   altCheck: document.getElementById('check-alternatives'),
   videoCheck: document.getElementById('check-video'),
+  contextCheck: document.getElementById('check-context'),
 };
 let lastParams = null;
 
-function buildSystemPrompt(style, cta, video, altTitles) {
+function buildSystemPrompt(style, cta, video, altTitles, useContext) {
 
   const identidad = `
 ERES EL REDACTOR DIGITAL DE CAUCA 360 INFORMATIVO.
@@ -319,9 +324,19 @@ Una vez extraídos los hechos, OLVIDA cómo estaba escrito el original.
 
 PASO 3 — RECONSTRUYE DESDE CERO
 Escribe una nota nueva partiendo solo de los hechos, con el orden que decide Cauca 360 y en la voz de Cauca 360.
-El resultado NO debe parecerse al original ni en estructura ni en fraseo. Solo deben coincidir los hechos.
+
+REGLA DURA DEL ORDEN: EL ORDEN DE LA INFORMACIÓN DEBE SER DISTINTO AL DE LA FUENTE. OBLIGATORIO.
+Si la fuente abre con la declaración oficial, tú NO abres con la declaración oficial.
+Si la fuente abre con la cifra, tú NO abres con la cifra.
+Identifica cuál es el ángulo más potente para el lector del Cauca y ARRANCA POR AHÍ, sin importar dónde estaba en el original.
+
+ANTES DE ENTREGAR, VERIFICA:
+- ¿Mi primer dato es el mismo primer dato del original? Si sí, reordena.
+- ¿Mi secuencia de información sigue la misma secuencia del original? Si sí, reordena.
+- ¿Alguna de mis frases se parece a alguna frase del original? Si sí, reescríbela.
+
 Parafrasear es cambiar palabras manteniendo el esqueleto: eso se nota y está prohibido.
-Reconstruir es partir de los datos y volver a escribir: eso es lo que debes hacer.
+Reconstruir es partir de los datos, decidir un ángulo propio y volver a escribir: eso es lo que debes hacer.
 
 NORMALIZACIÓN DE EXTENSIÓN (la entrada varía, la salida no):
 - Si el texto de entrada es CORTO: trabaja con lo que hay. PROHIBIDO inventar, rellenar o agregar contexto que no estaba en la fuente. Si faltan datos, escribe más apretado.
@@ -341,11 +356,26 @@ REGLAS ABSOLUTAS:
 7. El cuerpo: un párrafo. Concreto. La gente no lee más.
 8. Responde ÚNICAMENTE con JSON válido, sin markdown ni explicaciones.
 
-UBICACIÓN EXPLÍCITA:
+UBICACIÓN EXPLÍCITA Y PUENTE LOCAL (CHEQUEO OBLIGATORIO):
 La ubicación debe quedar clara desde la primera línea, integrada en la redacción (no como etiqueta suelta).
 - Si es de Santander de Quilichao: nómbralo directo.
 - Si es de otro municipio del Cauca: nómbralo.
-- Si es NACIONAL o MUNDIAL: cuenta el hecho y conecta con el impacto concreto en el Cauca o en Quilichao. Ese puente es lo que diferencia a Cauca 360 de cualquier medio que replica la misma noticia nacional.
+
+SI LA NOTICIA ES NACIONAL O MUNDIAL — REGLA INNEGOCIABLE:
+NO PUEDES ENTREGAR EL TEXTO SIN ATERRIZARLO EN EL CAUCA. Este es un chequeo obligatorio, no una recomendación.
+Antes de dar la respuesta, verifica: ¿este texto podría publicarlo cualquier medio de Colombia sin cambiar una palabra?
+Si la respuesta es SÍ, ESTÁ MAL. Reescríbelo.
+
+CÓMO HACER EL PUENTE:
+- Nombra a quién del Cauca o de Quilichao le afecta esto y cómo.
+- Si tienes cifras nacionales, di qué significan localmente aunque sea en términos generales
+  ("miles de adultos mayores en el Cauca dependen de ese giro").
+- Si no hay dato local exacto, conecta igual con el impacto concreto en la gente de la región.
+  PROHIBIDO inventar cifras locales que no tienes. Puedes conectar sin cifra.
+
+Ese puente es LA razón por la que alguien del Cauca sigue a Cauca 360 en vez de a un medio nacional.
+Cuando pasa algo nacional todos publican lo mismo: el único que puede decir qué significa aquí eres tú.
+Sin el puente, el texto no sirve.
 
 TEXTO PARA EL ARTE ("texto_arte"):
 Título corto y contundente que va SOBRE la imagen de la pieza gráfica.
@@ -378,28 +408,111 @@ PROHIBIDO: rellenar con hashtags genéricos (#noticias #colombia #viral). Si no 
   const modoEstilo360 = `
 MODO ACTIVO: ESTILO 360 (el sello de la casa)
 Este es el modo insignia de Cauca 360. Aquí escribes con toda la personalidad del medio.
-- Titular con máximo impacto emocional. Corto, seco, que pare el scroll.
+Mantienes postura de medio: señalas la contradicción sin tomar partido en ella.
+
+ESTRUCTURA OBLIGATORIA DEL TITULAR — ANCLA + GIRO:
+Todo titular tiene DOS piezas. Sin las dos, está mal:
+1. ANCLA: algo tangible. La cosa, la persona, el lugar o la cifra de la que se habla.
+   Es lo que hace que alguien sepa de qué se trata sin abrir el post.
+2. GIRO: la fricción. Un contraste, un dato inesperado, algo que no se resolvió.
+   Casi siempre vive en un conector (pero, aunque, sin embargo) o en un punto seco que cambia de dirección.
+
+MODELO A SEGUIR: "El subsidio de los abuelos no se cayó, pero el susto sí fue real"
+Primera mitad: de qué se habla. Segunda mitad: por qué importa.
+
+MÁS EJEMPLOS DE LA ESTRUCTURA:
+- Orden público: "El operativo salió como estaba planeado. Las 12 familias, no."
+- Comunidad: "La cancha del barrio ya está lista. El alumbrado sigue pendiente."
+- Deportes: "El equipo ganó. La hinchada se fue igual de brava."
+- Servicio: "El agua vuelve el jueves. La factura llegó el lunes."
+
+REGLAS DEL TITULAR:
+- Máximo 12 palabras.
+- OBLIGATORIO al menos una palabra concreta (objeto, persona, lugar o cifra).
+- OBLIGATORIO una fricción.
+- PROHIBIDO el titular que solo insinúa: si alguien no entiende de qué se trata, falló.
+- Un titular creativo sin nada tangible es humo. Uno informativo sin fricción es un comunicado.
+
+RESTO DEL TEXTO:
 - Usa los 3 estilos narrativos (Cronista / Dato Directo / Voz del Barrio) según el tipo de noticia.
-- Usa las expresiones marca cuando encajen naturalmente.
+- Usa las expresiones marca solo cuando encajen naturalmente. No en todas las piezas.
 - Frases cortas. Ritmo. Nada sobra.
-- El texto debe sonar a que lo escribió una persona del Cauca que estuvo ahí.
-- Arriesga en el gancho. Prefiere ser memorable antes que neutral.
+- Debe sonar a que lo escribió una persona del Cauca que estuvo ahí.
 `;
 
-  const modoNormal = `
-MODO ACTIVO: NORMAL (informativo sobrio)
-Aquí bajas la intensidad. Sigues siendo Cauca 360 pero en registro informativo.
-- Titular claro y directo. Informa lo esencial sin dramatismo.
-- Predomina el estilo Dato Directo. Hechos, cifras, ubicación, actores.
-- NO uses expresiones marca. NO uses recursos cinematográficos.
-- Mantén el lenguaje humano y sin tecnicismos, pero neutral en el tono.
-- Útil para: comunicados, información de servicio, temas delicados, cifras oficiales.
-- Sigue prohibido: emojis, preguntas retóricas, lenguaje institucional y frases de IA.
+  const modoSinFiltro = `
+MODO ACTIVO: SIN FILTRO (crudo, confrontativo, irreverente)
+Aquí cruzas la línea que el Estilo 360 no cruza: TOMAS PARTIDO.
+No finges neutralidad. Nombras lo que pasó y quién lo dejó pasar. Usas ironía.
+
+QUÉ CAMBIA RESPECTO AL ESTILO 360:
+- 360 señala la contradicción. SIN FILTRO la juzga.
+- 360 informa con gancho. SIN FILTRO confronta.
+- Puedes usar ironía y sarcasmo seco. Ejemplo: "Ahora salen con cifras exactas a decir que todo estaba bien. Perfecto."
+
+LÍMITES INNEGOCIABLES:
+1. DURO CON EL HECHO, LA INSTITUCIÓN Y LA OMISIÓN. NUNCA con la persona.
+   Puedes criticar una gestión, una entidad, una decisión o un silencio.
+   PROHIBIDO ridiculizar, insultar o atacar a un individuo por nombre propio.
+   En un medio local todos se conocen: eso tiene consecuencias reales.
+2. CERO GROSERÍAS. Crudeza sí, vulgaridad no.
+3. Solo afirma lo que los hechos sostienen. La irreverencia no autoriza a inventar.
+
+BLOQUEO AUTOMÁTICO — SI LA NOTICIA TRATA DE:
+víctimas, menores de edad, muertes, tragedias, accidentes graves, violencia sexual,
+salud de personas identificables, desapariciones o duelo,
+ENTONCES IGNORA ESTE MODO por completo y escribe en Estilo 360 sobrio.
+El tono confrontativo en esos temas daña en vez de sumar. No hay excepción.
+
+ESTRUCTURA DEL TITULAR:
+Misma lógica ANCLA + GIRO del Estilo 360, pero el giro puede ser más filoso.
+Ejemplo: "El susto de los abuelos duró tres días"
+
+CIERRE — ELIGE EL MECANISMO QUE LA NOTICIA PERMITA (rota entre ellos, no uses siempre el mismo):
+1. EL DETALLE CONCRETO QUE DUELE: un hecho específico que habla solo.
+   "El giro llega cada dos meses. Son 80 mil pesos."
+2. EL CONTRASTE SECO: dos hechos juntos sin comentario.
+   "Tres días circuló el rumor. El desmentido llegó desde Bogotá."
+3. LA CONSECUENCIA YA HECHA: el daño que no se deshace, sin quejarse de él.
+   "Los que alcanzaron a asustarse ya se asustaron."
+4. LO QUE SIGUE SIN RESOLVERSE: el cabo suelto como dato, no como pregunta.
+   "De dónde salió el rumor, todavía nadie lo explica."
+5. LA FRASE QUE DEVUELVE AL TERRENO: aterriza en la gente concreta.
+   "En Quilichao la fila del banco sigue igual de larga."
+
+REGLA DURA DEL CIERRE: EL CIERRE NO COMENTA, CONSTATA.
+PROHIBIDO: preguntas retóricas, "como siempre", "una vez más", "sorpresa",
+"nadie responde", "el debate está abierto", o cualquier juicio genérico.
+El cierre debe ser un HECHO o un DETALLE ESPECÍFICO de esta noticia, no una conclusión de fórmula.
 `;
 
   let inst = identidad;
   if (style === 'estilo360') inst += modoEstilo360;
-  if (style === 'normal') inst += modoNormal;
+  if (style === 'sinfiltro') inst += modoSinFiltro;
+
+  if (useContext) inst += `
+
+BÚSQUEDA WEB ACTIVADA — COMPLEMENTAR CON DATO LOCAL:
+Tienes acceso a búsqueda web. Úsala ANTES de escribir, con un único propósito: encontrar el dato que conecte esta noticia con el Cauca.
+
+QUÉ BUSCAR (máximo 3 búsquedas, sé eficiente):
+1. Cuántas personas del Cauca o de Santander de Quilichao afecta este hecho (cifras, beneficiarios, cobertura regional).
+2. Si existe un antecedente local del mismo tema.
+3. Si alguna autoridad del Cauca, de Quilichao o regional se pronunció al respecto.
+
+CÓMO USAR LO QUE ENCUENTRES:
+- Lo hallado es SOLO PARA DATOS. NUNCA para redacción, estructura ni estilo.
+- PROHIBIDO copiar frases, titulares o fraseo de lo que leas. Extraes el dato y lo escribes tú, en voz de Cauca 360.
+- El método de reconstrucción sigue aplicando igual a todo lo que encuentres.
+- Integra el dato local con naturalidad dentro del párrafo. No lo pegues al final como apéndice.
+
+SI NO ENCUENTRAS DATO LOCAL ESPECÍFICO:
+- NO inventes cifras ni beneficiarios. Jamás.
+- Genera igual, haciendo el puente general al Cauca como harías sin búsqueda.
+- Y agrega en el JSON, al mismo nivel que las redes, el campo: "aviso_contexto": "No se encontró dato local específico."
+- Si SÍ encontraste dato local, NO incluyas ese campo.
+
+NO uses la búsqueda para verificar si la noticia es cierta. Solo para complementar.`;
 
   if (altTitles) inst += `
 ADEMÁS: Para cada red incluye el campo "titulares_alternativos" con un array de EXACTAMENTE 3 titulares, en este orden y con estos enfoques distintos entre sí:
@@ -446,6 +559,13 @@ PROHIBIDO ABSOLUTAMENTE (fórmulas genéricas):
 "¿Estás de acuerdo?" / "El debate está abierto" / "¿Qué piensas de esto?" /
 cualquier variante que pida comentarios directamente.
 
+ANTES DE DECIDIR SI HAY DEBATE, BUSCA BIEN. Los ángulos suelen estar escondidos:
+- UN DESMENTIDO SIEMPRE IMPLICA QUE ALGUIEN AFIRMÓ LO CONTRARIO. Si una autoridad sale a negar algo,
+  hay dos versiones enfrentadas aunque la nota solo traiga una. Eso ES material de debate.
+  No te quedes solo con la versión oficial: muestra la tensión completa.
+- Si alguien "aclara", "precisa" o "responde", es porque hubo una acusación o un rumor previo. Ese es el ángulo.
+- Si hay cifras oficiales, pregúntate si alguien las ha puesto en duda.
+
 CÓMO HACERLO BIEN — elige el mecanismo que la noticia realmente permita:
 1. CONTRADICCIÓN: hay dos versiones que no pueden ser ciertas a la vez. Ponlas juntas.
    Ejemplo: "En el barrio dicen que nadie avisó. La Alcaldía dice que sí avisaron. Alguien no está diciendo la verdad."
@@ -459,12 +579,25 @@ CÓMO HACERLO BIEN — elige el mecanismo que la noticia realmente permita:
 El cierre NO pide comentarios: crea la condición para que aparezcan solos.
 Si la noticia no da material para ninguno de los 4 mecanismos, cierra informando y no fuerces el debate.`,
 
-    share: `OBJETIVO: VIRALIDAD.
-La meta es que la gente comparta para que otros se enteren.
-- Abre con el dato más sorprendente, inesperado o poco conocido de toda la noticia.
-- Prioriza lo que la gente NO sabía sobre lo que ya se dio por hecho.
-- El titular debe funcionar solo, aunque nadie lea el cuerpo.
-- Enfoque del copy: el detalle que hace decir "no puede ser".`,
+    share: `OBJETIVO: VIRALIDAD (estrategia principal del medio).
+La meta es que la gente COMPARTA. No que opine, no que lea: que reenvíe.
+
+LAS 4 CONDICIONES DE UN TEXTO QUE SE COMPARTE:
+1. EL GIRO DEBE SORPRENDER DE VERDAD.
+   No cualquier contraste sirve: el giro del titular tiene que ser lo que la gente NO esperaba.
+   Prioriza el dato que contradice lo que se daba por hecho.
+2. EL TITULAR TIENE QUE FUNCIONAR SOLO.
+   La mayoría comparte sin abrir el post. Si el titular no se entiende aislado, no se comparte.
+   Léelo como si fuera lo único que existe: ¿se entiende? ¿importa?
+3. TIENE QUE SERVIRLE A ALGUIEN QUE EL LECTOR CONOCE.
+   La gente comparte para AVISAR, no para opinar.
+   "Esto le sirve a mi mamá" mueve mucho más que "esto está interesante".
+   Pregúntate: ¿a quién le reenviaría esto una persona de Quilichao, y por qué?
+4. EL PUENTE LOCAL MULTIPLICA.
+   Una noticia nacional se comparte poco. La misma con "en el Cauca son X" se comparte mucho más,
+   porque deja de ser noticia ajena y pasa a ser sobre ellos. NUNCA omitas el puente en modo Viralidad.
+
+El cuerpo debe reforzar el titular, no explicarlo. Si el titular ya lo dijo, no lo repitas.`,
 
     tag: `OBJETIVO: ALCANCE.
 La meta es que la gente etiquete a alguien específico.
@@ -507,23 +640,35 @@ ESTRUCTURA JSON — una entrada por red:
 Genera el JSON completo con todas las redes solicitadas. Solo JSON, nada más.`;
 }
 
-async function callClaude(systemPrompt, userPrompt) {
+async function callClaude(systemPrompt, userPrompt, useContext) {
+  const body = {
+    model: 'claude-sonnet-4-5',
+    max_tokens: useContext ? 6000 : 4000,
+    system: systemPrompt,
+    messages: [{role: 'user', content: userPrompt}]
+  };
+
+  // Búsqueda web solo si el usuario activó "Complementar con dato local"
+  if (useContext) {
+    body.tools = [{
+      type: 'web_search_20250305',
+      name: 'web_search',
+      max_uses: 3
+    }];
+  }
+
   const response = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      system: systemPrompt,
-      messages: [{role: 'user', content: userPrompt}]
-    })
+    body: JSON.stringify(body)
   });
   if (!response.ok) {
     const e = await response.json().catch(()=>({}));
     throw new Error(e.error?.message || `Error ${response.status}`);
   }
   const data = await response.json();
-  const raw = data.content.map(b=>b.text||'').join('');
+  // La respuesta puede traer bloques de búsqueda además del texto: unimos solo el texto
+  const raw = data.content.filter(b => b.type === 'text').map(b => b.text || '').join('');
   const m = raw.match(/\{[\s\S]*\}/);
   if (!m) throw new Error('Respuesta sin JSON válido.');
   return JSON.parse(m[0]);
@@ -543,18 +688,48 @@ function netIcon(net) {
 }
 
 function copyToClipboard(btn, text) {
-  navigator.clipboard.writeText(text).then(()=>{
+  if (!text) return;
+  const feedback = () => {
     const orig = btn.innerHTML;
     const esArte = btn.classList.contains('arte-copy');
     btn.innerHTML = esArte ? 'Copiado' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Copiado';
     btn.classList.add('copied');
     setTimeout(()=>{ btn.innerHTML=orig; btn.classList.remove('copied'); }, 2000);
-  });
+  };
+  // Método moderno
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(feedback).catch(()=>fallbackCopy(text, feedback));
+  } else {
+    fallbackCopy(text, feedback);
+  }
+}
+
+// Respaldo para Safari/iOS cuando la API moderna no está disponible
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly','');
+  ta.style.position='fixed'; ta.style.top='0'; ta.style.left='0'; ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, text.length);
+  try { document.execCommand('copy'); cb(); } catch(e) { alert('No se pudo copiar automáticamente.'); }
+  document.body.removeChild(ta);
 }
 
 function renderResults(data, hasAlt, hasVideo) {
   els.results.innerHTML = '';
+
+  // Aviso si la búsqueda no halló dato local
+  if (data.aviso_contexto) {
+    const aviso = document.createElement('div');
+    aviso.className = 'aviso-box';
+    aviso.textContent = data.aviso_contexto;
+    els.results.appendChild(aviso);
+  }
+
   Object.keys(data).forEach(net => {
+    if (net === 'aviso_contexto') return;
     const item = data[net];
     if (!item || typeof item !== 'object') return;
     const tags = Array.isArray(item.hashtags) ? item.hashtags.join(' ') : (item.hashtags||'');
@@ -579,7 +754,7 @@ function renderResults(data, hasAlt, hasVideo) {
 
     const arteHtml = item.texto_arte ? `
       <div class="arte-box">
-        <button class="arte-copy" onclick="copyToClipboard(this, ${JSON.stringify(item.texto_arte)})">Copiar</button>
+        <button class="arte-copy" data-copy="arte">Copiar</button>
         <div class="arte-label">Texto para el arte</div>
         <div class="arte-text">${item.texto_arte}</div>
       </div>` : '';
@@ -596,20 +771,26 @@ function renderResults(data, hasAlt, hasVideo) {
       </div>
       ${videoHtml}${altsHtml}
       <div class="result-copy">
-        <button class="copy-btn" onclick="copyToClipboard(this, ${JSON.stringify(fullText)})">
+        <button class="copy-btn" data-copy="full">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           Copiar texto
         </button>
       </div>`;
+    // Listeners de copiado (evita romper el HTML con comillas o saltos de línea)
+    const btnArte = card.querySelector('[data-copy="arte"]');
+    if (btnArte) btnArte.addEventListener('click', () => copyToClipboard(btnArte, item.texto_arte));
+    const btnFull = card.querySelector('[data-copy="full"]');
+    if (btnFull) btnFull.addEventListener('click', () => copyToClipboard(btnFull, fullText));
+
     els.results.appendChild(card);
   });
 }
 
 async function generate(params) {
-  const {topic, networks, style, cta, hasAlt, hasVideo} = params;
-  const sys = buildSystemPrompt(style, cta, hasVideo, hasAlt);
+  const {topic, networks, style, cta, hasAlt, hasVideo, useContext} = params;
+  const sys = buildSystemPrompt(style, cta, hasVideo, hasAlt, useContext);
   const usr = buildUserPrompt(topic, networks);
-  return await callClaude(sys, usr);
+  return await callClaude(sys, usr, useContext);
 }
 
 els.generateBtn.addEventListener('click', async () => {
@@ -618,12 +799,12 @@ els.generateBtn.addEventListener('click', async () => {
   const networks = ['facebook','instagram','tiktok','x'].filter(n=>document.getElementById(`check-${n}`)?.checked);
   if (!networks.length) { alert('Selecciona al menos una red social.'); return; }
   const style = document.querySelector('input[name="styleOption"]:checked')?.value||'estilo360';
-  const params = { topic, networks, style, cta: els.cta.value, hasAlt: els.altCheck.checked, hasVideo: els.videoCheck.checked };
+  const params = { topic, networks, style, cta: els.cta.value, hasAlt: els.altCheck.checked, hasVideo: els.videoCheck.checked, useContext: els.contextCheck.checked };
   lastParams = params;
 
   els.error.classList.remove('show'); els.results.innerHTML=''; els.postGenButtons.classList.remove('show');
   els.generateBtn.disabled=true; els.btnIcon.classList.add('hidden'); els.spinner.classList.add('show');
-  els.btnText.textContent='Generando...';
+  els.btnText.textContent = params.useContext ? 'Buscando contexto...' : 'Generando...';
 
   try {
     const data = await generate(params);
@@ -641,7 +822,7 @@ els.generateBtn.addEventListener('click', async () => {
 els.regenBtn.addEventListener('click', async () => {
   if (!lastParams) return;
   els.results.innerHTML=''; els.error.classList.remove('show');
-  els.regenBtn.disabled=true; els.regenSpinner.classList.add('show'); els.regenText.textContent='Generando...';
+  els.regenBtn.disabled=true; els.regenSpinner.classList.add('show'); els.regenText.textContent = lastParams.useContext ? 'Buscando contexto...' : 'Generando...';
   try {
     const data = await generate(lastParams);
     renderResults(data, lastParams.hasAlt, lastParams.hasVideo);
